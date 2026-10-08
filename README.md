@@ -45,3 +45,10 @@ The trade-off is explicitness: context does **not** automatically follow a new t
 - `bind()` and `restore()` **shallow-copy** the mapping you give them. Deep cloning arbitrary user objects is not this library's job; pass simple, flat dicts.
 - A thread that has never bound or restored sees an empty view — `snapshot()` returns `{}` and `get(key, default=d)` returns `d`. Calling `set()` before any `bind()` / `restore()` raises `ContextError`.
 - Mutating the snapshot dict *after* restoring it has no effect on threads that already restored from it; `restore()` copies at call time. Mutating it before a *later* `restore()` does affect that later restore. Treat snapshots as write-once.
+
+## Design notes
+
+The window stores values eagerly rather than keeping running aggregates. Running
+sums drift with floating point over long streams, and recomputing from a small
+buffer is cheap enough that the drift is not worth the speed.
+
